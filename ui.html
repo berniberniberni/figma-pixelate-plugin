@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2><b>Pixelate Image</b></h2>
+    <label>Pixel Size: <input type="range" id="pixelSize" min="2" max="50" value="10"></label>
+    <button id="apply">Apply</button>
+
+    <script>
+      document.getElementById('apply').onclick = () => {
+        const pixelSize = document.getElementById('pixelSize').value;
+        parent.postMessage({ pluginMessage: { type: 'pixelate', pixelSize: parseInt(pixelSize) } }, '*');
+      };
+
+      window.onmessage = async (event) => {
+        const msg = event.data.pluginMessage;
+        if (msg.type === "process-image") {
+          console.log("Processing image in UI...");
+          
+          const bytes = new Uint8Array(msg.bytes);
+          const blob = new Blob([bytes]);
+          const img = new Image();
+          img.src = URL.createObjectURL(blob);
+
+          img.onload = () => {
+            console.log("Image loaded for processing...");
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const pixelSize = msg.pixelSize || 10;
+
+            canvas.width = img.width / pixelSize;
+            canvas.height = img.height / pixelSize;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(canvas, 0, 0, img.width, img.height);
+
+            canvas.toBlob(async (blob) => {
+              console.log("Processed image ready...");
+              
+              const arrayBuffer = await blob.arrayBuffer();
+              const newBytes = new Uint8Array(arrayBuffer);
+              parent.postMessage({ pluginMessage: { type: "processed-image", newBytes, nodeId: msg.nodeId } }, '*');
+            });
+          };
+        }
+      };
+    </script>
+  </body>
+</html>
