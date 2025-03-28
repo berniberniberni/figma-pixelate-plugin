@@ -1,4 +1,4 @@
-# Figma Pixelate Plugin 🎨🟣
+# Figma Pixelate Plugin
 
 A Figma plugin that pixelates image fills on selected rectangles using canvas-based image processing.
 
