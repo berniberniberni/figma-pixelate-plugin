@@ -1,0 +1,9 @@
+# Node modules (if you use them later)
+node_modules/
+
+# Mac system files
+.DS_Store
+
+# Plugin logs or backup files
+*.log
+*.bak
